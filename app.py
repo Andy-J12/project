@@ -1,5 +1,6 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import uvicorn
@@ -19,10 +20,14 @@ app.add_middleware(
 # Cargar el modelo
 model = joblib.load("model.pkl")
 
-@app.get("/")
+# Ruta para servir el archivo frontend.html
+@app.get("/", response_class=HTMLResponse)
 def read_root():
-    return {"message": "Bienvenido a mi API de predicción"}
+    with open("frontend.html", "r", encoding="utf-8") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
 
+# Ruta para las predicciones
 @app.post("/predict")
 def predict(data: dict):
     X = [data['age'], data['duration'], data['balance'], data['pdays']]
